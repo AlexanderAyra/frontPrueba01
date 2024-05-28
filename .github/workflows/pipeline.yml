@@ -20,7 +20,9 @@ jobs:
           ls -a
 
       - name: List the last two commit
-        run: PREVIOUS_COMMIT_SHA=$(git log --format="%H" -n 2)
+        run: |
+          PREVIOUS_COMMIT_SHA=$(git log --format="%H" -n 2)
+          echo "PREVIOUS_COMMIT_SHA=$PREVIOUS_COMMIT_SHA" >> $GITHUB_ENV
 
       - name: Penultimo
         run: echo "Penultimo commit es $PREVIOUS_COMMIT_SHA"
