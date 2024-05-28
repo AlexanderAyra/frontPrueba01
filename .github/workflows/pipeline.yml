@@ -1,0 +1,24 @@
+name: Deploy Alexander
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout Files
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: ls de los archivos
+        run: |
+          ls
+          ls -a
+
+      - name: List the last two commit
+        run: |
+          PREVIOUS_COMMIT_SHA=$(git log --format="%H" -n 2)
