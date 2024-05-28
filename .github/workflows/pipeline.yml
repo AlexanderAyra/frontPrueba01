@@ -20,6 +20,7 @@ jobs:
           ls -a
 
       - name: List the last two commit
-        run: |
-          PREVIOUS_COMMIT_SHA=$(git log --format="%H" -n 2)
-          echo "Penultimo commit es $PREVIOUS_COMMIT_SHA"
+        run: PREVIOUS_COMMIT_SHA=$(git log --format="%H" -n 2)
+
+      - name: Penultimo
+        run: echo "Penultimo commit es $PREVIOUS_COMMIT_SHA"
