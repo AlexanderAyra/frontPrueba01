@@ -60,10 +60,10 @@ jobs:
             else
               echo "File docker-compose.yaml does not exist."
             fi
-            if [ "$(docker ps -a -q -f name=FrontAle)" ]; then 
-              docker rm -f FrontAle
+            if [ "$(docker ps -a -q -f name=${{ secrets.NAME_CONTAINER }})" ]; then 
+              docker rm -f ${{ secrets.NAME_CONTAINER }}
             else
-              echo "Container FrontAle does not exist."
+              echo "Container ${{ secrets.NAME_CONTAINER }} does not exist."
             fi
             if [ "$(docker images -q ${{ secrets.APPFRONT }}:1.0)" ]; then
               docker rmi -f ${{ secrets.APPFRONT }}:1.0
@@ -72,7 +72,9 @@ jobs:
             fi
 
       - name: Create .env file
-        run: echo "DOCKER_IMAGE_NAME=${{ secrets.APPFRONT }}" > .env
+        run: |
+          echo "NAME_IMAGE=${{ secrets.APPFRONT }}" > .env
+          echo "NAME_CONTAINER=${{ secrets.NAME_CONTAINER }}" >> .env
 
       - name: Transfer Docker image to remote server AND create repositorio
         run: |

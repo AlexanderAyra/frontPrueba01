@@ -1,7 +1,7 @@
 services:
   app:
-    container_name: FrontAle
-    image: ${DOCKER_IMAGE_NAME}:1.0
+    container_name: ${NAME_CONTAINER}
+    image: ${NAME_IMAGE}:1.0
     restart: always
     ports:
       - 5000:5000
