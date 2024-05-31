@@ -69,7 +69,7 @@ jobs:
             fi
 
       - name: Create .env file
-        run: echo "DOCKER_IMAGE_NAME=${{ secrets.secrets.APPFRONT }}" > .env
+        run: echo "DOCKER_IMAGE_NAME=${{ secrets.APPFRONT }}" > .env
 
       - name: Transfer Docker image to remote server AND create repositorio
         run: |
