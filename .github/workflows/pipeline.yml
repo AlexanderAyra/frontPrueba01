@@ -11,8 +11,8 @@ jobs:
 
     # if: github.event.pull_request.merged == true && github.event.pull_request.merged_by != null
 
-    env:
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    # env:
+    #   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
     steps:
       - name: Checkout Files
@@ -34,7 +34,7 @@ jobs:
       #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Build Docker image
-        run: docker build -t ${{secrets.APPFRONT}}:1.0 .
+        run: docker build -t ${{ secrets.APPFRONT }:1.0 .
 
       - name: Save Docker image as tar file
         run: docker save -o ${{secrets.APPFRONT}}.tar ${{secrets.APPFRONT}}:1.0
