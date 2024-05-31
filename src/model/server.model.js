@@ -9,6 +9,7 @@ class Server {
 
   middleware() {
     this.app.use(express.json())
+    this.app.use(express.urlencoded({ extended: true }));
   }
 
   listen() {
