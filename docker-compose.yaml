@@ -2,7 +2,7 @@ version: "3.9"
 services:
   app:
     container_name: FrontAle
-    image: frontexample:1.0
+    image: ${DOCKER_IMAGE_NAME}:1.0
     restart: always
     ports:
       - 5000:5000

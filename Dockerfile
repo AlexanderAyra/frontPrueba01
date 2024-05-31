@@ -1,5 +1,5 @@
 FROM node:22.2.0-alpine3.20
-ENV PORT=3000
+ENV PORT=5000
 
 WORKDIR /app
 COPY . .

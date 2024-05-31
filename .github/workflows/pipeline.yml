@@ -1,4 +1,4 @@
-name: Deploy Alexander
+name: Deploy Alexander FrontEnd
 
 on:
   push:
@@ -8,38 +8,90 @@ on:
 jobs:
   build:
     runs-on: ubuntu-20.04
+
+    # if: github.event.pull_request.merged == true && github.event.pull_request.merged_by != null
+
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
     steps:
       - name: Checkout Files
         uses: actions/checkout@v4
 
+      # - name: Notify Slack
+      #   uses: act10ns/slack@v2
+      #   with:
+      #     channel: "#deploy-web"
+      #     status: ${{ job.status }}
+      #     steps: ${{ toJson(steps) }}
+      #     message: |
+      #       👍 Merge de PR aprobado en ${{ github.repository }} (${{ github.event.pull_request.base.ref }}) por ${{ github.event.pull_request.merged_by.login }}.
+      #       Empezando a crear el Repositorio Front End
+
+      #       Detalles: ${{ github.event.pull_request.html_url }}
+      #     mentions: "#deploy-web"
+      #   env:
+      #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+
       - name: Build Docker image
-        run: docker build -t ejemplo01:1.0 .
+        run: docker build -t ${{secrets.APPFRONT}}:1.0 .
 
       - name: Save Docker image as tar file
-        run: docker save -o ejemplo01.tar ejemplo01:1.0
+        run: docker save -o ${{secrets.APPFRONT}}.tar ${{secrets.APPFRONT}}:1.0
 
-      - name: Create .env file with GitHub SHA
-        run: echo "COMMIT_SHA=1.0" > .env
+      - name: DELETE FILES
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.REMOTE_SERVER_ADDRESS }}
+          username: ${{ secrets.REMOTE_SERVER_USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          script: |
+            cd ~/${{secrets.ROUTE_FILE}}
+            if [ -f "${{secrets.APPFRONT}}.tar" ]; then
+              rm -f ${{secrets.APPFRONT}}.tar
+            else
+            echo "File ${{secrets.APPFRONT}}.tar does not exist."
+            fi
+            if [ -f "docker-compose.yaml" ]; then
+              rm -f docker-compose.yaml
+            else
+              echo "File docker-compose.yaml does not exist."
+            fi
+            if [ "$(docker ps -a -q -f name=BackAle)" ]; then 
+              docker rm -f BackAle
+            else
+              echo "Container BackAle does not exist."
+            fi
+            if [ "$(docker images -q ${{secrets.APPFRONT}}:1.0)" ]; then
+              docker rmi -f ${{secrets.APPFRONT}}:1.0
+            else
+              echo "Image ${{secrets.APPFRONT}}:1.0 does not exist."
+            fi
 
-      - name: Transfer Docker image to remote server
+      - name: Create .env file
+        run: echo "DOCKER_IMAGE_NAME=${{ secrets.secrets.APPFRONT }}" > .env
+
+      - name: Transfer Docker image to remote server AND create repositorio
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          scp -o StrictHostKeyChecking=no ejemplo01.tar ${{ secrets.REMOTE_SERVER_USERNAME }}@${{ secrets.REMOTE_SERVER_ADDRESS }}:${{ secrets.REMOTE_SERVER_PATH }}
-
-      - name: Load Docker image on remote server
-        run: |
+          scp -o StrictHostKeyChecking=no ${{secrets.APPFRONT}}.tar ${{ secrets.REMOTE_SERVER_USERNAME }}@${{ secrets.REMOTE_SERVER_ADDRESS }}:${{ secrets.REMOTE_SERVER_PATH }}
           ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_SERVER_USERNAME }}@${{ secrets.REMOTE_SERVER_ADDRESS }} << 'ENDSSH'
-          docker load -i ${{ secrets.REMOTE_SERVER_PATH }}/ejemplo01.tar
+          docker load -i ${{ secrets.REMOTE_SERVER_PATH }}/${{secrets.APPFRONT}}.tar
           ENDSSH
-
-      - name: Transfer Docker Compose file to remote server
-        run: |
           scp -o StrictHostKeyChecking=no docker-compose.yaml ${{ secrets.REMOTE_SERVER_USERNAME }}@${{ secrets.REMOTE_SERVER_ADDRESS }}:${{ secrets.REMOTE_SERVER_PATH }}
-
-      - name: Deploy Docker containers using Docker Compose on remote server
-        run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_SERVER_USERNAME }}@${{ secrets.REMOTE_SERVER_ADDRESS }} << 'ENDSSH'
           docker compose -f ${{ secrets.REMOTE_SERVER_PATH }}/docker-compose.yaml up -d
           ENDSSH
+
+      # - name: Notifica cuando se haya lenatado la Web
+      #   uses: act10ns/slack@v2
+      #   if: always()
+      #   with:
+      #     channel: "#deploy-web"
+      #     status: ${{ job.status }}
+      #     steps: ${{ toJson(steps) }}
+      #     message: |
+      #       👍 Pipeline FrontEnd de GitHub Actions completado en ${{ github.repository }} por ${{ github.actor }}.
+      #       🚀 Ejecución exitosa de la integración continua.
