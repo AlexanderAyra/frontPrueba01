@@ -7,6 +7,10 @@ class Server {
     this.port = process.env.PORT || 5000;
   }
 
+  middleware() {
+    this.app.use(express.json())
+  }
+
   listen() {
     this.app.listen(this.port, () => {
       console.log('Corriendo en el puerto ' + this.port);

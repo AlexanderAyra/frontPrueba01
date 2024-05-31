@@ -9,29 +9,29 @@ jobs:
   build:
     runs-on: ubuntu-20.04
 
-    # if: github.event.pull_request.merged == true && github.event.pull_request.merged_by != null
+    if: github.event.pull_request.merged == true && github.event.pull_request.merged_by != null
 
-    # env:
-    #   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
     steps:
       - name: Checkout Files
         uses: actions/checkout@v4
 
-      # - name: Notify Slack
-      #   uses: act10ns/slack@v2
-      #   with:
-      #     channel: "#deploy-web"
-      #     status: ${{ job.status }}
-      #     steps: ${{ toJson(steps) }}
-      #     message: |
-      #       👍 Merge de PR aprobado en ${{ github.repository }} (${{ github.event.pull_request.base.ref }}) por ${{ github.event.pull_request.merged_by.login }}.
-      #       Empezando a crear el Repositorio Front End
+      - name: Notify Slack
+        uses: act10ns/slack@v2
+        with:
+          channel: "#deploy-web"
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
+          message: |
+            👍 Merge Front de PR aprobado en ${{ github.repository }} (${{ github.event.pull_request.base.ref }}) por ${{ github.event.pull_request.merged_by.login }}.
+            Empezando a crear el Repositorio Front End
 
-      #       Detalles: ${{ github.event.pull_request.html_url }}
-      #     mentions: "#deploy-web"
-      #   env:
-      #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+            Detalles: ${{ github.event.pull_request.html_url }}
+          mentions: "#deploy-web"
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Build Docker image
         run: docker build -t ${{ secrets.APPFRONT }}:1.0 .
@@ -62,10 +62,10 @@ jobs:
             else
               echo "File docker-compose.yaml does not exist."
             fi
-            if [ "$(docker ps -a -q -f name=BackAle)" ]; then 
-              docker rm -f BackAle
+            if [ "$(docker ps -a -q -f name=FrontAle)" ]; then 
+              docker rm -f FrontAle
             else
-              echo "Container BackAle does not exist."
+              echo "Container FrontAle does not exist."
             fi
             if [ "$(docker images -q ${{ secrets.APPFRONT }}:1.0)" ]; then
               docker rmi -f ${{ secrets.APPFRONT }}:1.0
@@ -91,13 +91,13 @@ jobs:
           docker compose -f ${{ secrets.REMOTE_SERVER_PATH }}/docker-compose.yaml up -d
           ENDSSH
 
-      # - name: Notifica cuando se haya lenatado la Web
-      #   uses: act10ns/slack@v2
-      #   if: always()
-      #   with:
-      #     channel: "#deploy-web"
-      #     status: ${{ job.status }}
-      #     steps: ${{ toJson(steps) }}
-      #     message: |
-      #       👍 Pipeline FrontEnd de GitHub Actions completado en ${{ github.repository }} por ${{ github.actor }}.
-      #       🚀 Ejecución exitosa de la integración continua.
+      - name: Notifica cuando se haya lenatado la Web
+        uses: act10ns/slack@v2
+        if: always()
+        with:
+          channel: "#deploy-web"
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
+          message: |
+            👍 Pipeline FrontEnd de GitHub Actions completado en ${{ github.repository }} por ${{ github.actor }}.
+            🚀 Ejecución exitosa de la integración continua.
