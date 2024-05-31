@@ -52,6 +52,11 @@ jobs:
             else
             echo "File ${{ secrets.APPFRONT }}.tar does not exist."
             fi
+            if [ -f ".env" ]; then
+              rm -f .env
+            else
+            echo "File .env does not exist."
+            fi
             if [ -f "docker-compose.yaml" ]; then
               rm -f docker-compose.yaml
             else
