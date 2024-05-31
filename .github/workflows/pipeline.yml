@@ -68,9 +68,8 @@ jobs:
               echo "Image ${{secrets.APPFRONT}}:1.0 does not exist."
             fi
 
-      - name: Create .env file
-        run: |
-          echo "DOCKER_IMAGE_NAME=${{ secrets.secrets.APPFRONT }}" > .env
+      - name: Set Docker image name
+        run: echo "DOCKER_IMAGE_NAME=${{ secrets.APPFRONT }}" >> $GITHUB_ENV
 
       - name: Transfer Docker image to remote server AND create repositorio
         run: |
