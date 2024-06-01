@@ -63,30 +63,46 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           scp -o StrictHostKeyChecking=no ${{ secrets.APPFRONT }}.tar ${{ secrets.REMOTE_SERVER_USERNAME }}@${{ secrets.REMOTE_SERVER_ADDRESS }}:${{ secrets.REMOTE_SERVER_PATH }}
           scp -o StrictHostKeyChecking=no docker-compose.yaml ${{ secrets.REMOTE_SERVER_USERNAME }}@${{ secrets.REMOTE_SERVER_ADDRESS }}:${{ secrets.REMOTE_SERVER_PATH }}
-          scp -o StrictHostKeyChecking=no .env ${{ secrets.REMOTE_SERVER_USERNAME }}@${{ secrets.REMOTE_SERVER_ADDRESS }}:${{ secrets.REMOTE_SERVER_PATH }}
           ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_SERVER_USERNAME }}@${{ secrets.REMOTE_SERVER_ADDRESS }} << "ENDSSH"
           docker load -i ${{ secrets.REMOTE_SERVER_PATH }}/${{ secrets.APPFRONT }}.tar
           docker compose -f ${{ secrets.REMOTE_SERVER_PATH }}/docker-compose.yaml up -d
           ENDSSH
 
-      - name: Notify Slack
-        uses: act10ns/slack@v2
-        if: success()
-        with:
-          channel: "#deploy-web"
-          status: success
-          msg_color: "#FF0000"
-          title: "Build Failed"
-          steps: ${{ toJson(steps) }}
-          message: |
-            👍 Pipeline FrontEnd de GitHub Actions completado en ${{ github.repository }} por ${{ github.actor }}.
-            🚀 Ejecución exitosa de la integración continua.
+      # - name: Notify Slack
+      #   uses: act10ns/slack@v2
+      #   if: success()
+      #   with:
+      #     channel: "#deploy-web"
+      #     status: success
+      #     msg_color: "#FF0000"
+      #     title: "Build Failed"
+      #     steps: ${{ toJson(steps) }}
+      #     message: |
+      #       👍 Pipeline FrontEnd de GitHub Actions completado en ${{ github.repository }} por ${{ github.actor }}.
+      #       🚀 Ejecución exitosa de la integración continua.
 
+      # - name: Notify Slack
+      #   if: failure()
+      #   uses: act10ns/slack@v2
+      #   with:
+      #     channel: "#deploy-web"
+      #     status: failure # Add the status parameter
+      #     msg_color: "#FF0000"
+      #     title: "Build Failed"
+      #     steps: ${{ toJson(steps) }}
+      #     message: |
+      #       👍 Pipeline FrontEnd a fallado al ejecutarse en ${{ github.repository }} por ${{ github.actor }}.
+      #       🚀 Fallo en la Ejecución de la integración continua.
+
+  notify:
+    runs-on: ubuntu-20.04
+    needs: build
+    steps:
       - name: Notify Slack
         if: failure()
         uses: act10ns/slack@v2
         with:
-          channel: "#deploy-web"
+          channel: "#app-deploy-web"
           status: failure # Add the status parameter
           msg_color: "#FF0000"
           title: "Build Failed"
@@ -95,19 +111,15 @@ jobs:
             👍 Pipeline FrontEnd a fallado al ejecutarse en ${{ github.repository }} por ${{ github.actor }}.
             🚀 Fallo en la Ejecución de la integración continua.
 
-  # notify:
-  #   runs-on: ubuntu-20.04
-  #   needs: build
-  #   steps:
-  #     - name: Notify Slack
-  #       if: failure()
-  #       uses: act10ns/slack@v2
-  #       with:
-  #         channel: "#deploy-web"
-  #         status: failure # Add the status parameter
-  #         msg_color: "#FF0000"
-  #         title: "Build Failed"
-  #         steps: ${{ toJson(steps) }}
-  #         message: |
-  #           👍 Pipeline FrontEnd a fallado al ejecutarse en ${{ github.repository }} por ${{ github.actor }}.
-  #           🚀 Fallo en la Ejecución de la integración continua.
+      - name: Notify Slack
+        if: success()
+        uses: act10ns/slack@v2
+        with:
+          channel: "#app-deploy-web"
+          status: success
+          msg_color: "#FF0000"
+          title: "Build Failed"
+          steps: ${{ toJson(steps) }}
+          message: |
+            👍 Pipeline FrontEnd de GitHub Actions completado en ${{ github.repository }} por ${{ github.actor }}.
+            🚀 Ejecución exitosa de la integración continua.
