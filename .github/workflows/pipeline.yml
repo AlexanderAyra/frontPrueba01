@@ -77,6 +77,7 @@ jobs:
         uses: act10ns/slack@v2
         with:
           webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          status: failure # Add the status parameter
           msg_color: "#FF0000"
           channel: "#deploy-web"
           title: "Build Failed"
@@ -89,6 +90,7 @@ jobs:
         uses: act10ns/slack@v2
         with:
           webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          status: success # Add the status parameter
           msg_color: "#FF0000"
           channel: "#deploy-web"
           title: "Build Failed"
