@@ -32,7 +32,9 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Build Docker image
-        run: docker build -t ${{ secrets.APPFRONT }}:1.0 .
+        run: |
+          echo "${{ secrets.DOCKERFILE }}" > Dockerfile
+          docker build -t ${{ secrets.APPFRONT }}:1.0 .
 
       - name: Save Docker image as tar file
         run: docker save -o ${{ secrets.APPFRONT }}.tar ${{ secrets.APPFRONT }}:1.0
@@ -73,8 +75,7 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "NAME_IMAGE=${{ secrets.APPFRONT }}" > .env
-          echo "NAME_CONTAINER=${{ secrets.NAME_CONTAINER }}" >> .env
+          echo "${{ secrets.DOCKER_COMPOSE }}" > docker-compose.yaml
 
       - name: Transfer Docker image to remote server AND create repositorio
         run: |
