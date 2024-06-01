@@ -76,11 +76,11 @@ jobs:
         if: failure()
         uses: act10ns/slack@v2
         with:
-          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          channel: "#deploy-web"
           status: failure # Add the status parameter
           msg_color: "#FF0000"
-          channel: "#deploy-web"
           title: "Build Failed"
+          steps: ${{ toJson(steps) }}
           message: |
             👍 Pipeline FrontEnd a fallado al ejecutarse en ${{ github.repository }} por ${{ github.actor }}.
             🚀 Fallo en la Ejecución de la integración continua.
@@ -89,11 +89,11 @@ jobs:
         if: success()
         uses: act10ns/slack@v2
         with:
-          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          status: success # Add the status parameter
-          msg_color: "#FF0000"
           channel: "#deploy-web"
+          status: success
+          msg_color: "#FF0000"
           title: "Build Failed"
+          steps: ${{ toJson(steps) }}
           message: |
             👍 Pipeline FrontEnd de GitHub Actions completado en ${{ github.repository }} por ${{ github.actor }}.
             🚀 Ejecución exitosa de la integración continua.
