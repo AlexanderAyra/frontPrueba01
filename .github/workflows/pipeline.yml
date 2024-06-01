@@ -21,10 +21,10 @@ jobs:
         run: |
           echo "${{ secrets.DOCKERFILE }}" > Dockerfile
           echo "${{ secrets.ENV_GLOBAL }}" > .env
-          docker build -t ${{ secrets.APPFRONT }}:1.0 .
+          docker build -t $(basename ${{ github.repository }}) | tr '[:upper:]' '[:lower:]:1.0 .
 
       - name: Save Docker image as tar file
-        run: docker save -o ${{ secrets.APPFRONT }}.tar ${{ secrets.APPFRONT }}:1.0
+        run: docker save -o $(basename ${{ github.repository }}) | tr '[:upper:]' '[:lower:].tar $(basename ${{ github.repository }}) | tr '[:upper:]' '[:lower:]:1.0
 
       - name: DELETE FILES
         uses: appleboy/ssh-action@master
@@ -34,7 +34,7 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
             cd ~/${{secrets.REMOTE_SERVER_PATH}}
-            for file in "${{ secrets.APPFRONT }}.tar" ".env" "docker-compose.yaml"; do
+            for file in "$(basename ${{ github.repository }}) | tr '[:upper:]' '[:lower:].tar" ".env" "docker-compose.yaml"; do
               if [ -f "$file" ]; then
                 rm -f "$file"
               else
@@ -46,8 +46,8 @@ jobs:
             else
               echo "Container ${{ secrets.NAME_CONTAINER }} does not exist."
             fi
-            if [ "$(docker images -q ${{ secrets.APPFRONT }}:1.0)" ]; then
-              docker rmi -f ${{ secrets.APPFRONT }}:1.0
+            if [ "$(docker images -q $(basename ${{ github.repository }}) | tr '[:upper:]' '[:lower:]:1.0)" ]; then
+              docker rmi -f $(basename ${{ github.repository }}) | tr '[:upper:]' '[:lower:]:1.0
             else
               echo "Image ${{secrets.APPFRONT}}:1.0 does not exist."
             fi
@@ -61,10 +61,10 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          scp -o StrictHostKeyChecking=no ${{ secrets.APPFRONT }}.tar ${{ secrets.REMOTE_SERVER_USERNAME }}@${{ secrets.REMOTE_SERVER_ADDRESS }}:${{ secrets.REMOTE_SERVER_PATH }}
+          scp -o StrictHostKeyChecking=no $(basename ${{ github.repository }}) | tr '[:upper:]' '[:lower:].tar ${{ secrets.REMOTE_SERVER_USERNAME }}@${{ secrets.REMOTE_SERVER_ADDRESS }}:${{ secrets.REMOTE_SERVER_PATH }}
           scp -o StrictHostKeyChecking=no docker-compose.yaml ${{ secrets.REMOTE_SERVER_USERNAME }}@${{ secrets.REMOTE_SERVER_ADDRESS }}:${{ secrets.REMOTE_SERVER_PATH }}
           ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_SERVER_USERNAME }}@${{ secrets.REMOTE_SERVER_ADDRESS }} << "ENDSSH"
-          docker load -i ${{ secrets.REMOTE_SERVER_PATH }}/${{ secrets.APPFRONT }}.tar
+          docker load -i ${{ secrets.REMOTE_SERVER_PATH }}/$(basename ${{ github.repository }}) | tr '[:upper:]' '[:lower:].tar
           docker compose -f ${{ secrets.REMOTE_SERVER_PATH }}/docker-compose.yaml up -d
           ENDSSH
 
