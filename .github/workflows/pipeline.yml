@@ -78,14 +78,14 @@ jobs:
           title: "Build Failed"
           steps: ${{ toJson(steps) }}
           message: |
-            "¡Excelente noticia! 🎉 La acción de GitHub en [Nombre del repositorio] se completó con éxito. Todo está en orden y listo para seguir adelante."
+            "¡Excelente noticia! 🎉 La acción de GitHub en ${{ github.repository }}. se completó con éxito. Todo está en orden y listo para seguir adelante."
 
       - name: Notify Slack
         if: failure()
         uses: act10ns/slack@v2
         with:
           channel: "#deploy-web"
-          status: failure # Add the status parameter
+          status: failure
           msg_color: "#FF0000"
           title: "Build Failed"
           steps: ${{ toJson(steps) }}
